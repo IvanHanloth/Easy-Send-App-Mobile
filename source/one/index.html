@@ -1,1 +1,349 @@
+<!Doctype html>
+<html>
 
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+		<title>Easy Send</title>
+		<link rel="stylesheet" type="text/css" href="./static/layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="./static/main.css">
+		<link rel="stylesheet" type="text/css" href="./static/font-awesome/css/font-awesome.min.css">
+		<script src="./static/jquery2.2.4.min.js"></script>
+		<script src="./static/layui/layui.js"></script>
+		<script src="./static/localforage.js"></script>
+	</head>
+
+	<body>	
+	<script>
+    plateform="";
+    version_num="";
+    version="";
+    //检查更新
+    layui.use(function(){
+        var layer=layui.layer;
+    
+    $.getJSON("./config.json",function(value){
+        web_url=value.web_url;
+        plateform=value.plateform;
+        version_num=value.version_num;
+        version=value.version;
+        $.getJSON(web_url+"/public/api/set_info.php",function(result){
+            if(result.mobile.version_num>version_num){
+                if(plateform=="android"){
+                    updateurl=result.mobile.android_url
+                }else if(plateform=="apple"){
+                    updateurl=result.mobile.apple_url
+                }
+                btnarray=['立即更新']
+                if(result.mobile.must=="off"){
+                    btnarray.push("下次再说")
+                }
+                layer.open({
+                  title: '发现新版本！'
+                  ,type:0
+                  ,closeBtn:0
+                  ,btn: btnarray
+                  ,btnAlign: 'c'
+                  ,area:["60%","75%"]
+                  ,content: '当前版本： '+version+'<br>最新版本： '+result.mobile.version+'<br>更新说明：'+result.mobile.update_description
+                  ,yes:function(){
+                      window.location.href=updateurl
+                      return false;
+                  }
+                });     
+      
+            }
+        })
+    })
+    })
+    </script>
+		<!--加载页面-->
+		<div id="loading-frame">
+			<table>
+				<td>
+					<li class="layui-icon layui-icon-loading-1 layui-anim layui-anim-rotate layui-anim-loop" style="font-size:30px;animation-duration: 1.5s;"></li>
+					<h2>正在为您准备……</h2>
+				</td>
+			</table>
+		</div>
+		<!--加号菜单-->
+		<div id="add-shade">
+			<div class="menu-button" id="menu-button-text" style="background-color:rgb(255,0,0);margin-bottom: 100px;">
+				<li style="font-size:40px;margin-top: 22.5px;font-family: '隶书';font-weight:800;">T</li>
+			</div>
+			<div class="menu-button" id="menu-button-file" style="background-color: rgb(255, 218, 10);margin-bottom: 210px;">
+				<li class="layui-icon layui-icon-file" style="font-size:40px;margin-top:22.55px;"></li>
+			</div>
+			<div class="menu-button" id="menu-button-get" style="background-color: rgb(10, 145, 255);margin-bottom: 320px;">
+				<li class="layui-icon layui-icon-download-circle" style="font-size:45px;margin-top:18.5px;"></li>
+			</div>
+			<div class="menu-button" id="menu-button-room" style="background-color: #ffb800 ;margin-bottom: 430px;">
+				<li class="layui-icon layui-icon-release" style="font-size:40px;margin-top: 22.5px;"></li>
+			</div>
+		</div>
+		<!--底部白色方菜单-->
+		<!--div style="position:fixed;bottom:0px;width:100%;height:60px;background-color: #ffffff;z-index:100;">
+        <div style="text-align: center;width:50%;float: left;padding-top: 20px;">button</div>
+
+        <div style="text-align: center;width:50%;float: right;padding-top: 20px;">button</div>
+    </div-->
+		<!--底部橙色圆菜单-->
+		<div style="display:flex;position:fixed;bottom:-2px;justify-content: center;z-index:200;height:100px;width:100%">
+			<div class="menu-center-button-bg" id="menu-center-button" action-data="close">
+				<li class="layui-icon layui-icon-add-1 menu-center-button" id="menu-center-button-icon"></li>
+			</div>
+		</div>
+		<!--主体-->
+		<div class="layui-hide" style="height:100%" id="main-div">			
+		<table>
+				<td>
+			<div id="main-file" class="layui-hide">
+				<div class="layui-upload-drag layui-anim layui-anim-upbit dragbox" id="upload" data-anim="layui-anim-down">
+					<div class="info">
+						<i class="layui-icon layui-anim layui-anim-upbit" data-anim="layui-anim-down"></i>
+						<p>点击上传，或将文件拖拽到此处</p>
+						<div id="upload-size-info">Loading…</div>
+						<div class="layui-hide info" id="upload-progress">
+							<div class="layui-progress layui-progress-big" lay-showpercent="yes" lay-filter="progress">
+								<div class="layui-progress-bar" lay-percent=""></div>
+							</div>
+						</div>
+					</div>
+					<p id="local-info"></p>
+				</div>
+				<div class="layui-hide info" id="upload-info">
+					<div id="file-info" class="info layui-hide">
+						<img id="file-qrcode" class="qrcode" src="./static/placeholder.svg">
+						<br>
+						<span class="code" id="file-code"></span>
+						<br>
+						<span>剩余查看次数:</span>
+						<span style="color: #FF5722;" id="file-leave-times"></span>
+						<br>
+						<span>到期时间:</span>
+						<span style="color: #FF5722;" id="file-leave-tillday"></span>
+						<br>
+						<br>
+						<button type="button" class="layui-btn btn" onclick="FileContinue()">继续上传</button>
+					</div>
+					<div id="reload-tip" class="layui-hide">
+						<button type="button" class="layui-btn btn" id="reload">重新上传</button>
+					</div>
+					<button type="button" class="layui-btn btn" id="upload-Action">开始上传</button>
+				</div>
+			</div>
+			<div id="main-text" class="layui-hide">
+				<style>
+					.textarea::-webkit-scrollbar {
+                        /*滚动条整体样式*/
+                        width: 8px;
+                        /*高宽分别对应横竖滚动条的尺寸*/
+                        height: 1px;
+                    }
+
+                    .textarea::-webkit-scrollbar-thumb {
+                        /*滚动条里面小方块*/
+                        border-radius: 8px;
+                        background-color: #02ab9c;
+                        background-image: -webkit-linear-gradient(45deg,
+                                #01cab7 10%,
+                                transparent 10%,
+                                transparent 30%,
+                                #01cab7 30%,
+
+                                #01cab7 50%,
+                                transparent 50%,
+                                transparent 70%,
+                                #01cab7 70%,
+
+                                #01cab7 90%,
+                                transparent 90%,
+                                transparent 100%,
+                                #01cab7 100%,
+                                transparent);
+                    }
+                </style>
+
+				<form class="layui-form formbox" action="">
+					<div class="layui-form-item layui-form-text layui-anim layui-anim-upbit" id="text">
+						<textarea name="text" placeholder="请输入内容" class="layui-textarea textarea" lay-verify="text" data-anim="layui-anim-down" id="text-textarea"></textarea>
+					</div>
+					<div class="info" id="text-btn">
+						<button type="submit" class="layui-btn btn layui-anim layui-anim-upbit " lay-submit="" lay-filter="save" data-anim="layui-anim-down">立即提交</button>
+					</div>
+					<div id="text-info" class="info layui-hide">
+						<img id="text-qrcode" class="qrcode" src="./static/placeholder.svg">
+						<br>
+						<span class="code" id="text-code"></span>
+						<br>
+						<span>剩余查看次数:</span>
+						<span style="color: #FF5722;" id="text-leave-times"></span>
+						<br>
+						<span>到期时间:</span>
+						<span style="color: #FF5722;" id="text-leave-tillday"></span>
+						<br>
+						<br>
+						<button type="button" class="layui-btn btn" onclick="TextContinue()">继续上传</button>
+					</div>
+				</form>
+			</div>
+			<div id="main-get" class="layui-hide">
+				<div id="input">
+					<form class="layui-form getbox">
+						<div class="layui-form-item layui-anim layui-anim-upbit">
+							<input type="text" name="key" lay-verify="get" pattern="/^[a-zA-Z0-9]{4}$/" autocomplete="off" placeholder="请输入4位提取码" id="get-input" value="" data-anim="layui-anim-down" class="layui-input get" onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" required>
+						</div>
+						<div class="info">
+							<button type="submit" class="layui-btn btn layui-anim layui-anim-upbit " lay-submit="" lay-filter="getbtn" data-anim="layui-anim-down">立即提取</button>
+						</div>
+					</form>
+				</div>
+				<div id="result" class="layui-hide formbox">
+					<div class="layui-form-item layui-form-text layui-anim layui-anim-upbit layui-hide" id="result-text">
+						<textarea class="layui-textarea textarea" data-anim="layui-anim-down" id="result-value"></textarea>
+					</div>
+					<div class="layui-form-item layui-anim layui-anim-upbit layui-hide" id="result-file">
+						<input type="text" value="" autocomplete="off" id="result-url" class="layui-input get" data-anim="layui-anim-down">
+					</div>
+					<div class="info layui-hide" id="result-download-btn">
+						<a id="result-download" href="" target="_blank">
+							<button type="button" class="layui-btn btn layui-anim layui-anim-upbit " data-anim="layui-anim-down">立即下载</button>
+						</a>
+					</div>
+					<div class="info layui-hide" id="result-info">
+						<span>剩余查看次数:</span>
+						<span style="color: #FF5722;" id="get-leave-times"></span>
+						<br>
+						<span>到期时间:</span>
+						<span style="color: #FF5722;" id="get-leave-tillday"></span>
+						<br>
+						<br>
+						<button type="button" class="layui-btn btn" onclick="GetContinue()">继续提取</button>
+					</div>
+				</div>
+			</div>
+			<div id="main-room" class="layui-hide">
+				<div id="room_input">
+					<form class="layui-form roombox">
+						<div class="layui-form-item layui-anim layui-anim-upbit">
+							<input type="text" name="roomid" lay-verify="roomid" autocomplete="off" placeholder="请输入房间号" id="roomid_input" data-anim="layui-anim-down" class="layui-input get" onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" required>
+						</div>
+						<div class="layui-form-item layui-anim layui-anim-upbit">
+							<input type="text" name="roompassword" lay-verify="roompassword" autocomplete="off" placeholder="请输入房间密码" id="roompassword_input" data-anim="layui-anim-down" class="layui-input get" onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" required>
+						</div>
+						<div class="info">
+							<button type="submit" class="layui-btn btn layui-anim layui-anim-upbit" lay-submit="" lay-filter="roombtn" data-anim="layui-anim-down">立即加入</button>
+						</div>
+					</form>
+				</div>
+				<div id="room_info" style="text-align:center" class="layui-hide">
+					<img src="./static/placeholder.svg" class="qrcode" id="room_qrcode">
+					<p>房间号：<span id="room_roomid"></span>
+					</p>
+					<p>房间状态：<span id="room_state"></span>
+					</p>
+					<p>我的身份：<span id="room_type"></span>
+					</p>
+				</div>
+				<div id="room_choose" class="layui-hide formbox" style="text-align:center">
+					<button type="button" class="layui-btn btn layui-anim layui-anim-upbit" lay-submit="" id="room_choose_send" data-anim="layui-anim-down">发送</button>
+					<br>
+					<button type="button" class="layui-btn btn layui-anim layui-anim-upbit" lay-submit="" id="room_choose_receive" data-anim="layui-anim-down">接收</button>
+				</div>
+				<div id="room_send" class="layui-hide formbox" style="text-align:center">
+					<div id="room_send_connected" class="layui-hide">
+						<button type="button" class="layui-btn" id="room_send_button">选择上传文件</button>
+						<input type="file" class="layui-hide" id="room_send_file">
+						<div id="room_send_file_info" class="layui-hide">
+							<p>文件大小:<span id="room_send_file_size"></span>MB</p>
+							<p>文件名称:<span id="room_send_file_name"></span>
+							</p>
+							<button type="button" onclick="room_upload(0)" class="layui-btn" id="room_send_button_confirm">确定发送</button>
+						</div>
+					</div>
+					<div id="room_send_sending" class="layui-hide">
+						<div class="layui-progress layui-progress-big" lay-showpercent="yes" lay-filter="room_progress">
+							<div class="layui-progress-bar" lay-percent=""></div>
+						</div>
+					</div>
+					<div id="room_send_finish" class="layui-hide">
+						<button type="button" class="layui-btn" id="room_send_button_continue">继续发送</button>
+					</div>
+				</div>
+				<div id="room_receive" class="layui-hide formbox">
+					<div id="room_receive_connected"></div>
+					<div id="room_receive_sending"></div>
+					<div id="room_receive_finish" class="layui-hide">
+					</div>
+				</div>
+			</div>
+				</td>
+						</table>
+		</div>
+		<script>
+			$("#menu-center-button").click(function () {
+						            if ($("#menu-center-button").attr("action-data") == "open") {//打开状态
+						                $("#menu-center-button-icon").css("-ms-transform", "")
+						                $("#menu-center-button-icon").css("transform", "")
+						                $("#menu-center-button").css("background-color", "")
+						                $("#add-shade").css("top", "1000%")
+						                $("#menu-center-button").attr("action-data", "close")
+						            } else {
+						                $("#menu-center-button-icon").css("-ms-transform", "rotate(45deg)")
+						                $("#menu-center-button-icon").css("transform", "rotate(45deg)")
+						                $("#menu-center-button").css("background-color", "#ffdfdf")
+						                $("#add-shade").css("top", "0px")
+						                $("#menu-center-button").attr("action-data", "open")
+						            }
+						        })
+						        function load_page(type,time,click){
+						            if(click){
+						                $("#menu-center-button").click()
+						            }
+						            $("#main-div").addClass("layui-hide");
+						            $("#loading-frame").removeClass("layui-hide")
+						            if(type=="file"){
+						                $("#main-file").removeClass("layui-hide")
+						                $("#main-text").addClass("layui-hide")
+						                $("#main-room").addClass("layui-hide")
+						                $("#main-get").addClass("layui-hide")
+						            }else if(type=="get"){
+						                $("#main-file").addClass("layui-hide")
+						                $("#main-text").addClass("layui-hide")
+						                $("#main-room").addClass("layui-hide")
+						                $("#main-get").removeClass("layui-hide")
+						            }else if(type=="room"){
+						                $("#main-file").addClass("layui-hide")
+						                $("#main-text").addClass("layui-hide")
+						                $("#main-room").removeClass("layui-hide")
+						                $("#main-get").addClass("layui-hide")
+						            }else if(type=="text"){
+						                $("#main-file").addClass("layui-hide")
+						                $("#main-text").removeClass("layui-hide")
+						                $("#main-room").addClass("layui-hide")
+						                $("#main-get").addClass("layui-hide")
+						            }
+						            a = setTimeout(function () {
+						                $("#main-div").removeClass("layui-hide");
+						                $("#loading-frame").addClass("layui-hide")
+						            }, time);
+						        }
+						        document.load=load_page("get",1500,false)
+						        $("#menu-button-get").click(function(){
+						            load_page("get",300,true)
+						        })
+						        $("#menu-button-room").click(function(){
+						            load_page("room",300,true)
+						        })
+						        $("#menu-button-file").click(function(){
+						            load_page("file",200,true)
+						        })
+						        $("#menu-button-text").click(function(){
+						            load_page("text",200,true)
+						        })
+		</script>
+
+		<script src="./static/main.js"></script>
+	</body>
+
+</html>
