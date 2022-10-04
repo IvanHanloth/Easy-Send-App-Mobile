@@ -1,0 +1,97 @@
+<!Doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <title>Welcome to Easy Send</title>
+    <link rel="stylesheet" type="text/css" href="./static/layui/css/layui.css">
+    <link rel="stylesheet" type="text/css" href="./static/main.css">
+    <script src="./static/jquery2.2.4.min.js"></script>
+    <script src="./static/layui/layui.js"></script>
+    <script src="./static/localforage.js"></script>
+</head>
+
+<body class="flex-center">
+        <div id="welcome">
+        <div class="layui-carousel" id="welcome-carousel">
+            <div carousel-item>
+                <div>
+                    <table>
+                        <td>
+                            <strong>
+                                <h1>Welcome To Easy Send</h1>
+                            </strong>
+                            <br>
+                            <h3>欢迎使用Easy Send，在正式开始使用之前，您需要先完善一些配置</h3><br><br>
+                            <li style="transform: rotate(-90deg);">
+                                <span id="continue"
+                                    class="layui-icon layui-icon-download-circle layui-anim layui-anim-fadeout layui-anim-loop"
+                                    style="font-size: 30px;animation-duration: 1.5s;animation-direction:alternate;animation-delay: 0.5s;"></span>
+                            </li>
+                        </td>
+                    </table>
+                </div>
+                <div>
+                    <table>
+                        <td>
+                            <form class="layui-form">
+                                <h3>为您提供服务的网站地址</h3>
+                                <br><Br>
+                                <div class="layui-inline" style="width:100px;margin-right: 3px;">
+                                    <select lay-verify="required" name="former_url">
+                                        <option value="https://">https://</option>
+                                        <option value="http://">http://</option>
+                                    </select>
+                                </div>
+                                <div class="layui-input-inline">
+                                    <input autocomplete="off" placeholder="请输入网址" name="main_url" class="layui-input"
+                                        onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;"
+                                        required lay-verify="required" id="main_url">
+                                </div>
+                                <div class="layui-inline">
+                                    <h2>/</h2>
+                                </div><br><br><br>
+                                <button type="button" class="layui-btn layui-btn-radius layui-btn-primary layui-btn-lg"
+                                    data-anim="layui-anim-down" type="submit" lay-submit=""
+                                    lay-filter="web_url">确认</button><br>
+                                <small style="color:#878787;line-height:100px;">配置完成后，您可通过点击窗口右上角<span class="layui-icon layui-icon-engine"></span>图标来更改此配置</small>
+                            </form>
+                        </td>
+                    </table>
+                </div>
+                <div>
+                    <table>
+                        <td>
+                            <li class="layui-icon layui-icon-loading-1 layui-anim layui-anim-rotate layui-anim-loop"
+                                style="font-size:50px;animation-duration: 1.5s;"></li>
+                            <h1>尝试连接至服务器……</h1>
+                        </td>
+                    </table>
+                </div>
+                <div>
+                    <table>
+                        <td>
+                            <li class="layui-icon layui-icon-ok-circle" style="font-size:100px;"></li>
+                            <h1>配置完成！您可以正式开始使用</h1><br><br>
+                                <button type="button" class="layui-btn layui-btn-radius layui-btn-primary layui-btn-lg" id="start_use">开始使用</button>
+                        </td>
+                    </table>
+                </div>
+                <div>
+                    <table>
+                        <td>
+                            <li class="layui-icon layui-icon-loading-1 layui-anim layui-anim-rotate layui-anim-loop"
+                                style="font-size:50px;animation-duration: 1.5s;"></li>
+                            <h1>正在为您准备……</h1>
+                        </td>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="./static/welcome.js"></script>
+    </body>
+    </html>
